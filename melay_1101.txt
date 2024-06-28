@@ -1,0 +1,92 @@
+//Design Code
+module melay_1101(input reset,clk,in, output out);
+  parameter s0=2'b00;
+  parameter s1=2'b01;
+  parameter s2=2'b10;
+  parameter s3=2'b11;
+  reg[1:0]state,next_state;
+  //present state logic sequential
+  always@(posedge clk or posedge reset)
+    begin
+      if(reset)
+        state<=s0;
+      else
+        state<=next_state;
+    end
+  //next state logic combinational
+  always@*
+    begin
+      case(state)
+        s0 : begin
+          if(in)
+            next_state=s1;
+          else
+            next_state=s0;
+        end
+        s1 : begin
+          if(in)
+            next_state=s2;
+          else
+            next_state=s0;
+        end
+        s2 : begin
+          if(in)
+            next_state=s2;
+          else
+            next_state=s3;
+        end
+        s3 : begin
+          if(in)
+            next_state=s0;
+          else
+            next_state=s0;
+        end
+        default: begin
+                  next_state=s0;
+        end
+      endcase
+    end
+  //output logic
+  assign out = (state==s3) && (in==1'b1)? 1'b1:1'b0;
+endmodule
+
+//Test Bench Code
+module tb();
+  reg reset,clk,in;
+  wire out;
+  melay_1101 dut(reset,clk,in,out);
+  initial
+    begin
+      clk=1'b0;
+      forever #5 clk=~clk;
+    end
+  initial
+    begin
+      reset=1'b1;#10;
+      reset=1'b0;
+      in=1'b1;#10;
+      in=1'b1;#10;
+      in=1'b0;#10;
+      in=1'b1;#10;
+      in=1'b1;#10;
+      in=1'b1;#10;
+      in=1'b0;#10;
+      in=1'b1;#10;
+      in=1'b1;#10;
+      in=1'b1;#10;
+      in=1'b0;#10;
+      in=1'b1;#10;
+      in=1'b1;#10;
+      in=1'b0;#10;
+      $finish;
+    end
+  initial
+    begin
+      $monitor("in=%0d,out=%0d",in,out);
+    end
+  initial
+    begin
+      $dumpfile("test.vcd");
+      $dumpvars(1);
+    end
+endmodule
